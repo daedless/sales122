@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Messages | Dashboard</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="user.css">
+  <style>
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.7);
+    }
+    .modal-content {
+      background-color: #202528;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 400px;
+      color: #fff;
+    }
+    .modal-content h2 {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .modal-content p {
+      margin: 8px 0;
+    }
+    .close-modal {
+      float: right;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* Filters */
+    .messages-filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .messages-filters input,
+    .messages-filters select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      flex: 1;
+    }
+
+    /* Table */
+    .users-table table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #202528;
+      color: #eee;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .users-table th, .users-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #2a2f36;
+      font-size: 14px;
+    }
+    .users-table th {
+      background: #2a2f36;
+    }
+    .users-table tr:hover {
+      background: #2a2f36;
+    }
+    .btn-action {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      margin-right: 5px;
+      color: #fff;
+    }
+    .btn-details { background-color: #4cafef; }
+    .btn-details:hover { background-color: #3a8ed6; }
+
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- Sidebar Section -->
+  <aside>
+  <div class="toggle">
+    <div class="logo">
+      <img src="images/logo.png">
+      <h2>Asmr<span class="danger">Prog</span></h2>
+    </div>
+    <div class="close" id="close-btn">
+      <span class="material-icons-sharp">close</span>
+    </div>
+  </div>
+  <div class="sidebar">
+    <a href="index.html">
+      <span class="material-icons-sharp">dashboard</span>
+      <h3>Dashboard</h3>
+    </a>
+    <a href="users.html">
+      <span class="material-icons-sharp">person_outline</span>
+      <h3>Users</h3>
+    </a>
+    <a href="orders.html" >
+      <span class="material-icons-sharp">receipt_long</span>
+      <h3>Orders</h3>
+    </a>
+    <a href="stock.html">
+      <span class="material-icons-sharp">inventory</span>
+      <h3>Stock</h3>
+    </a>
+    <a href="list.html">
+      <span class="material-icons-sharp">category</span>
+      <h3>Products</h3>
+    </a>
+    <a href="contact.html" class="active">
+      <span class="material-icons-sharp">mail_outline</span>
+      <h3>Contact</h3>
+    </a>
+    <a href="sale-list.html">
+      <span class="material-icons-sharp">inventory</span>
+      <h3>Sale List</h3>
+    </a>
+    
+    <a href="star.html">
+      <span class="material-icons-sharp">military_tech</span>
+      <h3>Top Buyers</h3>
+    </a>
+    <a href="settings.html">
+      <span class="material-icons-sharp">settings</span>
+      <h3>Settings</h3>
+    </a>
+    <a href="logout.html">
+      <span class="material-icons-sharp">logout</span>
+      <h3>Logout</h3>
+    </a>
+  </div>
+</aside>
+
+  <!-- Main Content -->
+  <main>
+    <h1>Contact Messages</h1>
+    <div class="users-header">
+      <h2>Client Messages</h2>
+    </div>
+
+    <!-- Filters -->
+    <div class="messages-filters">
+      <input type="text" id="searchMessageInput" placeholder="Search by Name, Email, or Subject..." onkeyup="filterMessages()">
+      <select id="statusFilter" onchange="filterMessages()">
+        <option value="">All Status</option>
+        <option value="New">New</option>
+        <option value="Read">Read</option>
+      </select>
+    </div>
+
+    <!-- Messages Table -->
+    <div class="users-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="messagesTableBody">
+          <tr>
+            <td>John Doe</td>
+            <td>john@example.com</td>
+            <td>Product Inquiry</td>
+            <td>New</td>
+            <td>
+              <button class="btn-action btn-details" onclick="openMessageModal('John Doe','john@example.com','Product Inquiry','Hi, I want to know more about your jackets.')">View</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Jane Smith</td>
+            <td>jane@example.com</td>
+            <td>Order Issue</td>
+            <td>Read</td>
+            <td>
+              <button class="btn-action btn-details" onclick="openMessageModal('Jane Smith','jane@example.com','Order Issue','My last order has not arrived yet.')">View</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Bob Johnson</td>
+            <td>bob@example.com</td>
+            <td>Feedback</td>
+            <td>New</td>
+            <td>
+              <button class="btn-action btn-details" onclick="openMessageModal('Bob Johnson','bob@example.com','Feedback','Great website, easy to use!')">View</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Right Section -->
+  <div class="right-section">
+    <div class="nav">
+      <button id="menu-btn">
+        <span class="material-icons-sharp">menu</span>
+      </button>
+      <div class="dark-mode">
+        <span class="material-icons-sharp active">light_mode</span>
+        <span class="material-icons-sharp">dark_mode</span>
+      </div>
+      <div class="profile">
+        <div class="info">
+          <p>Hey, <b>Reza</b></p>
+          <small class="text-muted">Admin</small>
+        </div>
+        <div class="profile-photo">
+          <img src="images/profile-1.jpg">
+        </div>
+      </div>
+    </div>
+    <div class="user-clock">
+      <h2 id="clock-time">00:00:00</h2>
+      <p id="clock-date"></p>
+      <canvas id="analog-clock" width="180" height="180"></canvas>
+    </div>
+    <div class="reminders">
+      <div class="header">
+        <h2>Reminders</h2>
+        <span class="material-icons-sharp">notifications_none</span>
+      </div>
+      <div class="notification">
+        <div class="icon">
+          <span class="material-icons-sharp">volume_up</span>
+        </div>
+        <div class="content">
+          <div class="info">
+            <h3>Workshop</h3>
+            <small class="text_muted">08:00 AM - 12:00 PM</small>
+          </div>
+          <span class="material-icons-sharp">more_vert</span>
+        </div>
+      </div>
+      <div class="notification deactive">
+        <div class="icon">
+          <span class="material-icons-sharp">edit</span>
+        </div>
+        <div class="content">
+          <div class="info">
+            <h3>Workshop</h3>
+            <small class="text_muted">08:00 AM - 12:00 PM</small>
+          </div>
+          <span class="material-icons-sharp">more_vert</span>
+        </div>
+      </div>
+      <div class="notification add-reminder">
+        <div>
+          <span class="material-icons-sharp">add</span>
+          <h3>Add Reminder</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="messageModal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeMessageModal">&times;</span>
+    <h2>Message Details</h2>
+    <p><b>Name:</b> <span id="modalName"></span></p>
+    <p><b>Email:</b> <span id="modalEmail"></span></p>
+    <p><b>Subject:</b> <span id="modalSubject"></span></p>
+    <p><b>Message:</b> <span id="modalMessage"></span></p>
+  </div>
+</div>
+
+<script>
+  // Message Modal
+  const messageModal = document.getElementById("messageModal");
+  const closeMessageModalBtn = document.getElementById("closeMessageModal");
+  function openMessageModal(name, email, subject, message){
+    document.getElementById("modalName").innerText = name;
+    document.getElementById("modalEmail").innerText = email;
+    document.getElementById("modalSubject").innerText = subject;
+    document.getElementById("modalMessage").innerText = message;
+    messageModal.style.display = "block";
+  }
+  closeMessageModalBtn.onclick = () => messageModal.style.display = "none";
+  window.onclick = e => { if(e.target == messageModal) messageModal.style.display = "none"; }
+
+  // Search & Filter
+  function filterMessages(){
+    const searchValue = document.getElementById("searchMessageInput").value.toLowerCase();
+    const statusValue = document.getElementById("statusFilter").value;
+    const table = document.getElementById("messagesTableBody");
+    const rows = table.getElementsByTagName("tr");
+
+    for(let i=0;i<rows.length;i++){
+      const cells = rows[i].getElementsByTagName("td");
+      const name = cells[0].innerText.toLowerCase();
+      const email = cells[1].innerText.toLowerCase();
+      const subject = cells[2].innerText.toLowerCase();
+      const status = cells[3].innerText;
+
+      const matchSearch = name.includes(searchValue) || email.includes(searchValue) || subject.includes(searchValue);
+      const matchStatus = statusValue === "" || status === statusValue;
+
+      rows[i].style.display = (matchSearch && matchStatus) ? "" : "none";
+    }
+  }
+</script>
+
+<script src="index2.js"></script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top Buyers | Dashboard</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="user.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  /* Main table styles */
+  .top-buyers { margin-top: 30px; position: relative; }
+  .buyers-table {
+    background: #202528;
+    padding: 20px;
+    border-radius: 10px;
+    overflow-x: auto;
+    position: relative;
+  }
+  .buyers-table .tb_filters {
+    margin-bottom: 15px;
+    display: flex;
+    gap: 10px;
+  }
+  .buyers-table input, .buyers-table select {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fff;
+    color: #000;
+  }
+  .buyers-table input::placeholder { color: #555; }
+  table { width: 100%; border-collapse: collapse; color: #fff; }
+  table thead { background: #2d2f38; }
+  table th, table td { padding: 12px; text-align: left; }
+  table tbody tr:hover { background: #2a2d35; }
+  .tb_btn_view {
+    background: #4cafef;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .tb_btn_view:hover { background: #3a8ed6; }
+  .tb_btn_pdf {
+    position: absolute;
+    right: 43px;
+    top: 20px;
+    background: #f44336;
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .tb_btn_pdf:hover { background: #c62828; }
+
+  /* Fancy modal */
+  .tb_modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7);
+    animation: fadeIn 0.3s;
+  }
+  .tb_modal_content {
+    background-color: #2a2e31;
+    margin: 8% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    color: #fff;
+    box-shadow: 0px 5px 25px rgba(0,0,0,0.5);
+    transform: translateY(-50px);
+    animation: slideDown 0.4s forwards;
+  }
+  @keyframes slideDown { from {opacity:0; transform:translateY(-50px);} to {opacity:1; transform:translateY(0);} }
+  @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+  .tb_modal_content h2 { text-align: center; margin-bottom: 15px; font-size: 24px; }
+  .tb_modal_content p { margin: 10px 0; font-size: 16px; }
+  .tb_close_modal { float: right; font-size: 24px; cursor: pointer; color: #f44336; }
+  .tb_close_modal:hover { color: #fff; }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Sidebar -->
+  <aside>
+  <div class="toggle">
+    <div class="logo">
+      <img src="images/logo.png">
+      <h2>Asmr<span class="danger">Prog</span></h2>
+    </div>
+    <div class="close" id="close-btn">
+      <span class="material-icons-sharp">close</span>
+    </div>
+  </div>
+  <div class="sidebar">
+    <a href="index.html">
+      <span class="material-icons-sharp">dashboard</span>
+      <h3>Dashboard</h3>
+    </a>
+    <a href="users.html">
+      <span class="material-icons-sharp">person_outline</span>
+      <h3>Users</h3>
+    </a>
+    <a href="orders.html" >
+      <span class="material-icons-sharp">receipt_long</span>
+      <h3>Orders</h3>
+    </a>
+    <a href="stock.html">
+      <span class="material-icons-sharp">inventory</span>
+      <h3>Stock</h3>
+    </a>
+    <a href="list.html">
+      <span class="material-icons-sharp">category</span>
+      <h3>Products</h3>
+    </a>
+    <a href="contact.html" >
+      <span class="material-icons-sharp">mail_outline</span>
+      <h3>Contact</h3>
+    </a>
+    <a href="sale-list.html">
+      <span class="material-icons-sharp">inventory</span>
+      <h3>Sale List</h3>
+    </a>
+    
+    <a href="star.html" class="active">
+      <span class="material-icons-sharp">military_tech</span>
+      <h3>Top Buyers</h3>
+    </a>
+    <a href="settings.html" >
+      <span class="material-icons-sharp">settings</span>
+      <h3>Settings</h3>
+    </a>
+    <a href="logout.html">
+      <span class="material-icons-sharp">logout</span>
+      <h3>Logout</h3>
+    </a>
+  </div>
+</aside>
+
+  <!-- Main Content -->
+  <main>
+    <h1>Top Buyers</h1>
+    <div class="top-buyers">
+      <div class="buyers-table">
+        <button class="tb_btn_pdf" onclick="tb_exportPDF()">Export PDF</button>
+        <div class="tb_filters">
+          <input type="text" id="tb_searchInput" placeholder="Search buyer...">
+          <select id="tb_locationFilter">
+            <option value="">All Locations</option>
+            <option value="Beirut">Beirut</option>
+            <option value="Tripoli">Tripoli</option>
+            <option value="Sidon">Sidon</option>
+          </select>
+        </div>
+        <table id="tb_buyersTable">
+          <thead>
+            <tr>
+              <th>Buyer Name</th>
+              <th>Email</th>
+              <th>Location</th>
+              <th>Total Spent</th>
+              <th>Orders</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Ali Hassan</td><td>ali@example.com</td><td>Beirut</td><td>$1,240</td><td>12</td>
+              <td><button class="tb_btn_view" onclick="tb_openModal(this)">View Info</button></td>
+            </tr>
+            <tr>
+              <td>Sara Ahmed</td><td>sara@example.com</td><td>Tripoli</td><td>$980</td><td>8</td>
+              <td><button class="tb_btn_view" onclick="tb_openModal(this)">View Info</button></td>
+            </tr>
+            <tr>
+              <td>Mohammed Noor</td><td>noor@example.com</td><td>Sidon</td><td>$870</td><td>10</td>
+              <td><button class="tb_btn_view" onclick="tb_openModal(this)">View Info</button></td>
+            </tr>
+            <tr>
+              <td>Layla Karim</td><td>layla@example.com</td><td>Beirut</td><td>$720</td><td>7</td>
+              <td><button class="tb_btn_view" onclick="tb_openModal(this)">View Info</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Right Section -->
+  <div class="right-section">
+    <div class="nav">
+      <button id="menu-btn"><span class="material-icons-sharp">menu</span></button>
+      <div class="dark-mode"><span class="material-icons-sharp active">light_mode</span><span class="material-icons-sharp">dark_mode</span></div>
+      <div class="profile">
+        <div class="info"><p>Hey, <b>Reza</b></p><small class="text-muted">Admin</small></div>
+        <div class="profile-photo"><img src="images/profile-1.jpg"></div>
+      </div>
+    </div>
+    <div class="user-clock"><h2 id="clock-time">00:00:00</h2><p id="clock-date"></p><canvas id="analog-clock" width="180" height="180"></canvas></div>
+    <div class="reminders">
+      <div class="header"><h2>Reminders</h2><span class="material-icons-sharp">notifications_none</span></div>
+      <div class="notification">
+        <div class="icon"><span class="material-icons-sharp">volume_up</span></div>
+        <div class="content"><div class="info"><h3>Workshop</h3><small class="text_muted">08:00 AM - 12:00 PM</small></div><span class="material-icons-sharp">more_vert</span></div>
+      </div>
+      <div class="notification deactive">
+        <div class="icon"><span class="material-icons-sharp">edit</span></div>
+        <div class="content"><div class="info"><h3>Workshop</h3><small class="text_muted">08:00 AM - 12:00 PM</small></div><span class="material-icons-sharp">more_vert</span></div>
+      </div>
+      <div class="notification add-reminder"><div><span class="material-icons-sharp">add</span><h3>Add Reminder</h3></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Fancy Modal -->
+<div id="tb_viewModal" class="tb_modal">
+  <div class="tb_modal_content">
+    <span class="tb_close_modal" onclick="tb_closeModal()">&times;</span>
+    <h2>Buyer Info</h2>
+    <p><strong>Name:</strong> <span id="tb_modalName"></span></p>
+    <p><strong>Email:</strong> <span id="tb_modalEmail"></span></p>
+    <p><strong>Location:</strong> <span id="tb_modalLocation"></span></p>
+    <p><strong>Total Spent:</strong> <span id="tb_modalSpent"></span></p>
+    <p><strong>Orders:</strong> <span id="tb_modalOrders"></span></p>
+  </div>
+</div>
+
+<script>
+  // Unique filter variables
+  const tb_searchInput = document.getElementById('tb_searchInput');
+  const tb_locationFilter = document.getElementById('tb_locationFilter');
+  const tb_tableRows = document.querySelectorAll('#tb_buyersTable tbody tr');
+
+  function tb_filterTable() {
+    const search = tb_searchInput.value.toLowerCase();
+    const location = tb_locationFilter.value;
+    tb_tableRows.forEach(row => {
+      const name = row.cells[0].textContent.toLowerCase();
+      const email = row.cells[1].textContent.toLowerCase();
+      const rowLocation = row.cells[2].textContent;
+      const matchSearch = name.includes(search) || email.includes(search);
+      const matchLocation = location === "" || location === rowLocation;
+      row.style.display = (matchSearch && matchLocation) ? "" : "none";
+    });
+  }
+
+  tb_searchInput.addEventListener('keyup', tb_filterTable);
+  tb_locationFilter.addEventListener('change', tb_filterTable);
+
+  // Unique modal variables/functions
+  const tb_modal = document.getElementById('tb_viewModal');
+  const tb_modalName = document.getElementById('tb_modalName');
+  const tb_modalEmail = document.getElementById('tb_modalEmail');
+  const tb_modalLocation = document.getElementById('tb_modalLocation');
+  const tb_modalSpent = document.getElementById('tb_modalSpent');
+  const tb_modalOrders = document.getElementById('tb_modalOrders');
+
+  function tb_openModal(button) {
+    const row = button.closest('tr');
+    tb_modalName.textContent = row.cells[0].textContent;
+    tb_modalEmail.textContent = row.cells[1].textContent;
+    tb_modalLocation.textContent = row.cells[2].textContent;
+    tb_modalSpent.textContent = row.cells[3].textContent;
+    tb_modalOrders.textContent = row.cells[4].textContent;
+    tb_modal.style.display = 'block';
+  }
+  function tb_closeModal() { tb_modal.style.display = 'none'; }
+  window.addEventListener('click', event => { if(event.target == tb_modal) tb_modal.style.display = 'none'; });
+
+  // Unique PDF export
+  function tb_exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text("Top Buyers Report", 14, 20);
+    const rows = [];
+    tb_tableRows.forEach(row => {
+      if(row.style.display !== "none") {
+        rows.push([
+          row.cells[0].textContent,
+          row.cells[1].textContent,
+          row.cells[2].textContent,
+          row.cells[3].textContent,
+          row.cells[4].textContent
+        ]);
+      }
+    });
+    doc.autoTable({
+      head: [['Name','Email','Location','Total Spent','Orders']],
+      body: rows,
+      startY: 30,
+    });
+    doc.save('top_buyers.pdf');
+  }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="index2.js"></script>
+</body>
+</html>
